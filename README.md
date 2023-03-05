@@ -2,7 +2,7 @@
 
 - 800+ spanish words
 
-![image](https://i.imgur.com/Cmtv2Zt.png)
+![image](https://i.imgur.com/Omff9ZP.png)
 
 # Run
 
