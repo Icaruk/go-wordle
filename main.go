@@ -38,7 +38,7 @@ func askGuess() string {
 
 		// Check if the guess is 5 letters long
 		if len(guess) != 5 {
-			fmt.Println("⚠️  La palabra debe tener 5 letras.")
+			fmt.Println("⚠️ La palabra debe tener 5 letras.")
 			continue
 		}
 		break
@@ -77,7 +77,7 @@ func printCheckedGuess(guess string, guessResult []string) {
 		if status == "correct" {
 			color.New(color.FgGreen, color.Bold).Printf(stringTemplate, character)
 		} else if status == "present" {
-			color.New(color.FgGreen, color.Bold).Printf(stringTemplate, character)
+			color.New(color.FgYellow, color.Bold).Printf(stringTemplate, character)
 		} else {
 			color.New(color.FgRed, color.Bold).Printf(stringTemplate, character)
 		}
@@ -88,8 +88,7 @@ func printCheckedGuess(guess string, guessResult []string) {
 
 }
 
-func main() {
-
+func getRandomWord() string {
 	// Read json with word data. Original: https://gist.github.com/NiciusB/860b1e5b73f95fbb2c49
 	jsonFile, err := os.Open("wordData.json")
 	if err != nil {
@@ -105,6 +104,13 @@ func main() {
 	// Get random word
 	word := wordData[rand.Intn(len(wordData))]
 	word = strings.ToUpper(word)
+
+	return word
+}
+
+func main() {
+
+	word := getRandomWord()
 
 	// fmt.Println("DEBUG:", word) //! DEBUG
 	fmt.Printf("Adivina la palabra de 5 letras en %d intentos.\n", maxAttempts)
