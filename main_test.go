@@ -21,6 +21,7 @@ func TestCheckGuess(t *testing.T) {
 		{"5th absent", "ASDFX", "ASDFG", []string{"correct", "correct", "correct", "correct", "absent"}},
 		{"All absent", "XXXXX", "ASDFG", []string{"absent", "absent", "absent", "absent", "absent"}},
 		{"1,2 present 3 absent 4,5 correct", "SAXFG", "ASDFG", []string{"present", "present", "absent", "correct", "correct"}},
+		{"YERER REYES", "YERER", "REYES", []string{"present", "correct", "present", "correct", "present"}},
 	}
 
 	// The execution loop
