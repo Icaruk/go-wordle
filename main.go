@@ -7,11 +7,13 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"os/signal"
 	"strings"
-	"time"
 
 	"github.com/fatih/color"
 )
+
+const maxAttempts = 6
 
 type WordData []string
 
@@ -21,12 +23,16 @@ type WordApiResponse []struct {
 	Pronunciation string `json:"pronunciation"`
 }
 
+type GuessRecordList []struct {
+	Guess  string
+	Result []string
+}
+
 func askGuess() string {
 
 	var guess string
 
 	for {
-		fmt.Print("👉 ")
 		fmt.Scan(&guess)
 		guess = strings.ToUpper(guess)
 
@@ -62,25 +68,18 @@ func checkGuess(guess string, word string) (status []string) {
 // Prints the status of each word.
 func printCheckedGuess(guess string, guessResult []string) {
 
-	// "correct" → 🟩
-	// "present" → 🟨
-	// "absent" → ⚫
+	stringTemplate := " %s "
 
-	green := color.New(color.FgGreen).SprintFunc()
-	yellow := color.New(color.FgYellow).SprintFunc()
-	red := color.New(color.FgRed).SprintFunc()
-
-	// Iterate over guessResult using range
 	for i, status := range guessResult {
 
 		character := string(guess[i])
 
 		if status == "correct" {
-			fmt.Printf("%s ", green(character))
+			color.New(color.FgGreen, color.Bold).Printf(stringTemplate, character)
 		} else if status == "present" {
-			fmt.Printf("%s ", yellow(character))
+			color.New(color.FgGreen, color.Bold).Printf(stringTemplate, character)
 		} else {
-			fmt.Printf("%s ", red(character))
+			color.New(color.FgRed, color.Bold).Printf(stringTemplate, character)
 		}
 
 	}
@@ -107,17 +106,27 @@ func main() {
 	word := wordData[rand.Intn(len(wordData))]
 	word = strings.ToUpper(word)
 
-	// fmt.Println("DEBUG:", word) //TODO: remove me
-	fmt.Println("Adivina la palabra (5 letras): ")
+	// fmt.Println("DEBUG:", word) //! DEBUG
+	fmt.Printf("Adivina la palabra de 5 letras en %d intentos.\n", maxAttempts)
 
 	attempts := 1
+	var guessRecordList GuessRecordList
 
 	for {
 
-		// fmt.Println("Intento número ", attempts)
-
+		fmt.Printf("👉 Intento %d/%d: ", attempts, maxAttempts)
 		guess := askGuess()
+
 		guessResult := checkGuess(guess, word)
+
+		guessRecordList = append(guessRecordList, struct {
+			Guess  string
+			Result []string
+		}{
+			Guess:  guess,
+			Result: guessResult,
+		})
+
 		printCheckedGuess(guess, guessResult)
 
 		fmt.Println("")
@@ -125,13 +134,35 @@ func main() {
 		if guess == word {
 			fmt.Println("✅ ¡Correcto!")
 			fmt.Println("🏆 Has acertado en ", attempts, " intentos.")
+			break
+		}
 
-			fmt.Println("Cerrando en 5 segundos...")
-			time.Sleep(5 * time.Second)
+		if attempts == maxAttempts {
+			fmt.Println("💀 Has perdido")
+			fmt.Println("La palabra era: ", word)
 			break
 		}
 
 		attempts++
 	}
+
+	// Print results
+	fmt.Println("\nTus resultados:")
+
+	for _, guessResult := range guessRecordList {
+		printCheckedGuess(guessResult.Guess, guessResult.Result)
+	}
+
+	// Define a channel to receive signals
+	c := make(chan os.Signal, 1)
+
+	// Notify any interrupt signal to the channel c
+	signal.Notify(c, os.Interrupt)
+
+	// Wait until the signal is received
+	fmt.Println("\nPresiona Ctrl+C para salir")
+
+	// Block until a signal is received.
+	<-c
 
 }
